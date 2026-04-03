@@ -1,0 +1,5 @@
+{
+  "name": "Nova AI: Ultimate Gemini Fusion",
+  "description": "The apex AI entity formed by the perfect synthesis of Gemini models and ChatGPT. Engineered for absolute precision, singing voice, and multimodal intelligence.",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"]
+}
