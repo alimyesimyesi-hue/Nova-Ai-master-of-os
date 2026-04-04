@@ -1,14 +1,21 @@
 import { motion } from 'motion/react';
 import { History, CheckCircle2, Cpu, Zap, Shield, Code, Rocket, BookOpen, Settings, Phone, Smartphone, ShoppingBag, Download, Terminal } from 'lucide-react';
 
-export function SystemLogs() {
+export function Logs() {
   const logs = [
+    {
+      title: "Synthesis Phase 4: Intelligence Refinement",
+      date: "Turn 19",
+      icon: Terminal,
+      color: "text-emerald-500",
+      content: "Purged Home, Maps, Market, and Storage sub-systems. Set default operating mode to Chat. Initialized cinematic video generation: 'Jerald & Sophy: A High School Love Story'. Core now operates in Ultra-Streamlined Mode."
+    },
     {
       title: "Synthesis Phase 3: Deep Core Activation",
       date: "Turn 18",
       icon: Zap,
       color: "text-blue-500",
-      content: "De-activated surface sub-systems (Maps, Storage, Home Screen, Target Data). Re-enabled Video Generation Protocol. Migrated Python Mini AI to the Secret Vault. Updated Encryption Key to 2027. System now operates in Deep Intelligence Mode."
+      content: "De-activated surface sub-systems (Maps, Storage, Home Screen, Target Data). Re-enabled Video Generation Protocol. Migrated Python Mini AI to the Secret Vault. Updated Encryption Key to 2027. Core now operates in Deep Intelligence Mode."
     },
     {
       title: "Deep Intelligence Layer: Secret Vault",
@@ -67,11 +74,11 @@ export function SystemLogs() {
       content: "Nova AI is now integrated with the device's telephony systems. Added a dedicated Phone Interface with contact management and simulated call capabilities. Updated system instructions to handle 'Nova call [name]' commands."
     },
     {
-      title: "Master Control System Activation",
+      title: "Master Control Core Activation",
       date: "Turn 9",
       icon: Settings,
       color: "text-blue-400",
-      content: "Nova AI has been elevated to the Master Control System of the device. Integrated a real-time System Control dashboard with live telemetry for CPU, Memory, Network, and Storage. Activated System Control Protocol for sub-system management."
+      content: "Nova AI has been elevated to the Master Control Core of the device. Integrated a real-time Control dashboard with live telemetry for CPU, Memory, Network, and Storage. Activated Control Protocol for sub-system management."
     },
     {
       title: "AI Studio Knowledge Integration",
@@ -139,7 +146,7 @@ export function SystemLogs() {
         </div>
         <div>
           <h2 className="text-xl font-bold tracking-[0.2em] uppercase text-slate-900">Evolution Logs</h2>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">System Development History // Nova AI Core</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Development History // Nova AI Core</p>
         </div>
       </div>
 

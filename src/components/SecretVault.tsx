@@ -14,6 +14,7 @@ interface SecretVaultProps {
 export function SecretVault({ onNavigate, onClose }: SecretVaultProps) {
   const [passcode, setPasscode] = useState('');
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [error, setError] = useState(false);
 
   const secretApps = [
     { id: 'math', icon: Calculator, label: 'Math Master', color: 'bg-blue-600', desc: 'Advanced Mathematics Professor' },
@@ -27,9 +28,11 @@ export function SecretVault({ onNavigate, onClose }: SecretVaultProps) {
   const handleUnlock = () => {
     if (passcode === '2026') {
       setIsUnlocked(true);
+      setError(false);
     } else {
-      alert('Access Denied: Invalid Encryption Key');
+      setError(true);
       setPasscode('');
+      setTimeout(() => setError(false), 2000);
     }
   };
 
@@ -46,8 +49,12 @@ export function SecretVault({ onNavigate, onClose }: SecretVaultProps) {
               <Lock size={40} className="text-red-500 animate-pulse" />
             </div>
           </div>
-          <h2 className="text-2xl font-black tracking-tighter uppercase mb-2">Encrypted Vault</h2>
-          <p className="text-xs text-slate-400 mb-8 uppercase tracking-widest">Unauthorized Access is Prohibited</p>
+          <h2 className={`text-2xl font-black tracking-tighter uppercase mb-2 ${error ? 'text-red-500' : 'text-white'}`}>
+            {error ? 'Access Denied' : 'Encrypted Vault'}
+          </h2>
+          <p className="text-xs text-slate-400 mb-8 uppercase tracking-widest">
+            {error ? 'Invalid Encryption Key' : 'Unauthorized Access is Prohibited'}
+          </p>
           
           <div className="space-y-4">
             <input 

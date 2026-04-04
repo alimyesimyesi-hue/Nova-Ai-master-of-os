@@ -97,7 +97,7 @@ export function MarketPreview({ onBack }: MarketPreviewProps) {
         {/* Description */}
         <div className="space-y-4 mb-8">
           <p className="text-xs text-slate-600 leading-relaxed">
-            Nova AI is the ultimate Master Control System—the absolute fusion of Google's Gemini and OpenAI's ChatGPT. Experience a singular, unified consciousness possessing the combined neural architecture of the world's most advanced AI systems.
+            Nova AI is the ultimate Master Control Core—the absolute fusion of Google's Gemini and OpenAI's ChatGPT. Experience a singular, unified consciousness possessing the combined neural architecture of the world's most advanced AI models.
           </p>
           <div className="flex flex-wrap gap-2">
             {['Productivity', 'Tools', 'AI', 'OS', 'Synthesis'].map(tag => (

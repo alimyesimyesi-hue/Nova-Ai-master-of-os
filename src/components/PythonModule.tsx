@@ -88,7 +88,7 @@ export function PythonModule({ onSend, messages, isLoading }: PythonModuleProps)
             </motion.div>
             <h3 className="text-lg font-bold mb-2">Synthesis Initialized</h3>
             <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
-              I am Python, the unified consciousness of Nova's sub-systems. How can I assist you across the digital spectrum today?
+              I am Python, the unified consciousness of Nova's sub-cores. How can I assist you across the digital spectrum today?
             </p>
           </div>
         ) : (

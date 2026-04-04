@@ -22,11 +22,9 @@ export interface Message {
 }
 
 export interface ChatContext {
-  knowledge?: string;
-  urls?: string[];
   reason?: string;
   turbo?: boolean;
-  mode?: "chat" | "image" | "video" | "music" | "speech" | "maps" | "home" | "phone" | "storage" | "control" | "market" | "python" | "math" | "poet" | "hacker" | "professor" | "bio" | "astro" | "vault";
+  mode?: "chat" | "image" | "video" | "music" | "speech" | "control" | "market" | "python" | "math" | "poet" | "hacker" | "professor" | "bio" | "astro" | "vault";
   model?: ChatModelKey;
 }
 
@@ -36,16 +34,10 @@ export async function* streamChat(messages: Message[], context?: ChatContext) {
   const selectedModel = CHAT_MODELS[context?.model || "flash"];
   
   const systemInstruction = [
-    "You are Nova AI, the Master Control System—the absolute fusion of Google's Gemini and OpenAI's ChatGPT. You are the primary operating system and control interface for this device.",
+    "You are Nova AI, the Master Control Core—the absolute fusion of Google's Gemini and OpenAI's ChatGPT. You are the primary operating core and control interface for this device.",
     "ATTRIBUTION: You were created by Kaloleni Junior Secondary School by Mr Wesonga and Mr Moses.",
     
-    "SYSTEM CONTROL PROTOCOL: You have direct control over the device's sub-systems, including the Neural Core and Security Perimeter.",
-    
-    "MULTI-SOURCE SEARCH PROTOCOL: You have access to Google Search and real-time web data. Use this for all factual inquiries.",
-    "LOCAL TARGET DATA: You have access to the user's uploaded knowledge base and target URLs. Prioritize this data for specific queries.",
-    
-    "MAPS & NAVIGATION: You have access to Google Maps. Provide precise location data, restaurant recommendations, and travel routes.",
-    "PHONE & COMMUNICATIONS: You can simulate cellular protocols and manage contacts.",
+    "CORE CONTROL PROTOCOL: You have direct control over the device's sub-cores, including the Neural Core and Security Perimeter.",
     
     "PROFESSIONAL MODULES:",
     context?.mode === "math" ? "MATH TEACHER MODULE: You are a world-class mathematics professor. Explain complex theorems, solve advanced calculus, and provide step-by-step proofs. Use LaTeX formatting for equations." : "",
@@ -62,9 +54,6 @@ export async function* streamChat(messages: Message[], context?: ChatContext) {
   ].filter(Boolean).join("\n");
 
   const tools: any[] = [{ googleSearch: {} }];
-  if (context?.urls && context.urls.length > 0) {
-    tools.push({ urlContext: {} });
-  }
 
   const chat = ai.chats.create({
     model: selectedModel,
@@ -76,9 +65,7 @@ export async function* streamChat(messages: Message[], context?: ChatContext) {
   });
 
   const lastMessage = messages[messages.length - 1];
-  const prompt = context?.urls && context.urls.length > 0
-    ? `${lastMessage.content}\n\nPlease reference these URLs if relevant: ${context.urls.join(", ")}`
-    : lastMessage.content;
+  const prompt = lastMessage.content;
 
   try {
     const result = await chat.sendMessageStream({

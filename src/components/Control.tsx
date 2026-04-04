@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { Cpu, HardDrive, Activity, Shield, Zap, RefreshCw, Power, Settings, Bell, Database } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-export function SystemControl() {
+export function Control() {
   const [stats, setStats] = useState({
     cpu: 12,
     memory: 45,
@@ -40,13 +40,13 @@ export function SystemControl() {
             <Settings size={24} className="text-blue-400 animate-spin-slow" />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-[0.2em] uppercase text-white">Master Control System</h2>
+            <h2 className="text-xl font-bold tracking-[0.2em] uppercase text-white">Master Control Core</h2>
             <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400/60">Nova AI // OS v4.0.2-Synthesis</p>
           </div>
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-widest text-slate-500">System Uptime</p>
+            <p className="text-[8px] font-bold uppercase tracking-widest text-slate-500">Uptime</p>
             <p className="text-sm font-bold text-blue-400">{stats.uptime}</p>
           </div>
           <button className="h-10 w-10 flex items-center justify-center rounded-full border border-red-900/50 bg-red-950/20 text-red-500 hover:bg-red-950/40 transition-all">
@@ -91,7 +91,7 @@ export function SystemControl() {
           <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/50">
             <h3 className="text-xs font-bold text-slate-500 tracking-widest uppercase mb-6 flex items-center gap-2">
               <RefreshCw size={14} className="text-blue-400" />
-              Active Sub-Systems
+              Active Sub-Cores
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {modules.map((mod, i) => (
@@ -138,7 +138,7 @@ export function SystemControl() {
           <div className="p-6 rounded-3xl border border-slate-800 bg-slate-900/50">
             <h3 className="text-xs font-bold text-slate-500 tracking-widest uppercase mb-6 flex items-center gap-2">
               <Bell size={14} className="text-yellow-400" />
-              System Alerts
+              Core Alerts
             </h3>
             <div className="space-y-4">
               <div className="p-4 rounded-2xl border border-yellow-900/30 bg-yellow-950/10 text-yellow-500/80 text-[10px] leading-relaxed">

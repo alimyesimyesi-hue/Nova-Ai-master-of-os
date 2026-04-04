@@ -1,16 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Terminal, Trash2, Shield, BookOpen, Cpu, AlertTriangle, Zap, Image as ImageIcon, Video, Music, MapPin, MessageSquare, Sprout, HardDrive, Menu, X as CloseIcon, Plus, Mic, History, Settings, Phone, Home, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Terminal, Trash2, Shield, BookOpen, Cpu, AlertTriangle, Zap, Image as ImageIcon, Video, Music, MessageSquare, Menu, X as CloseIcon, Plus, Mic, History, Settings, ArrowLeft, Brain, ShoppingBag } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
-import { KnowledgeManager } from './components/KnowledgeManager';
 import { OverrideModal } from './components/OverrideModal';
-import { StorageManager } from './components/StorageManager';
-import { SystemLogs } from './components/SystemLogs';
-import { SystemControl } from './components/SystemControl';
-import { PhoneInterface } from './components/PhoneInterface';
-import { HomeScreen } from './components/HomeScreen';
-import { MarketPreview } from './components/MarketPreview';
+import { Logs } from './components/Logs';
+import { Control } from './components/Control';
 import { DeploymentGuide } from './components/DeploymentGuide';
 import { PythonModule } from './components/PythonModule';
 import { SecretVault } from './components/SecretVault';
@@ -30,9 +25,8 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isTurbo, setIsTurbo] = useState(false);
-  const [mode, setMode] = useState<ChatContext['mode'] | 'storage' | 'logs' | 'docs' | 'control' | 'market' | 'python' | 'vault' | 'home' | 'phone'>('home');
+  const [mode, setMode] = useState<ChatContext['mode'] | 'logs' | 'docs' | 'control' | 'market' | 'python' | 'vault'>('chat');
   const [chatModel, setChatModel] = useState<ChatModelKey>('flash');
-  const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false);
   const [isOverrideOpen, setIsOverrideOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(true); // Assume true initially
 
@@ -53,8 +47,6 @@ export default function App() {
     }
   };
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [knowledge, setKnowledge] = useState('');
-  const [urls, setUrls] = useState<string[]>([]);
   const [lastReason, setLastReason] = useState('');
   const [processingTime, setProcessingTime] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -93,11 +85,9 @@ export default function App() {
 
         let fullContent = '';
         const context: ChatContext = { 
-          knowledge, 
-          urls, 
           reason: reason || lastReason, 
           turbo: isTurbo, 
-          mode: mode === 'storage' || mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'phone' || mode === 'home' || mode === 'market' || mode === 'python' || mode === 'vault' ? 'chat' : mode,
+          mode: mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'market' || mode === 'python' || mode === 'vault' ? 'chat' : mode,
           model: chatModel
         };
         const stream = streamChat(newMessages, context);
@@ -181,16 +171,12 @@ export default function App() {
 
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-2">Multimodal Hub</p>
             {[
-              { id: 'home', icon: Home, label: 'Home' },
-              { id: 'python', icon: Terminal, label: 'Python Mini AI' },
               { id: 'chat', icon: MessageSquare, label: 'Chat' },
               { id: 'video', icon: Video, label: 'Generate Video' },
-              { id: 'maps', icon: MapPin, label: 'Maps' },
               { id: 'market', icon: ShoppingBag, label: 'Market' },
-              { id: 'storage', icon: HardDrive, label: 'Storage' },
-              { id: 'logs', icon: History, label: 'System Logs' },
+              { id: 'logs', icon: History, label: 'Logs' },
               { id: 'docs', icon: BookOpen, label: 'Documentation' },
-              { id: 'control', icon: Settings, label: 'System Control' },
+              { id: 'control', icon: Settings, label: 'Control' },
             ].map((item) => (
               <button
                 key={item.id}
@@ -218,13 +204,6 @@ export default function App() {
               <span className="font-bold">Turbo Mode</span>
             </button>
             <button
-              onClick={() => setIsKnowledgeOpen(true)}
-              className="flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-100 transition-all"
-            >
-              <Shield size={16} />
-              <span className="font-bold">Target Data</span>
-            </button>
-            <button
               onClick={() => setIsOverrideOpen(true)}
               className="flex items-center gap-3 w-full rounded-lg px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-all"
             >
@@ -250,8 +229,7 @@ export default function App() {
         <div className="hidden lg:block absolute inset-0 pointer-events-none z-50 border-[12px] border-slate-900 rounded-[3rem] shadow-[0_0_0_1px_rgba(255,255,255,0.1)_inset]" />
         
         {/* Header */}
-        {mode !== 'home' && (
-          <header className="flex h-14 shrink-0 items-center justify-between border-b bg-white/80 backdrop-blur-md px-4 z-20">
+        <header className="flex h-14 shrink-0 items-center justify-between border-b bg-white/80 backdrop-blur-md px-4 z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -259,14 +237,12 @@ export default function App() {
             >
               {isSidebarOpen ? <CloseIcon size={20} /> : <Menu size={20} />}
             </button>
-            <div className="flex items-center gap-2">
-              <div className="h-6 w-6 overflow-hidden rounded-md border border-slate-200">
-                <img 
-                  src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=100&h=100&auto=format&fit=crop" 
-                  alt="Nova AI" 
-                  className="h-full w-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
+            <div 
+              className="flex items-center gap-2 cursor-pointer"
+              onDoubleClick={() => setMode('vault')}
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
+                <Brain size={18} />
               </div>
               <div className="flex flex-col">
                 <h1 className="text-xs font-black tracking-[0.3em] uppercase leading-none">Nova AI</h1>
@@ -280,27 +256,18 @@ export default function App() {
             </p>
           )}
         </header>
-        )}
 
         {/* Chat Area */}
         <main 
           ref={scrollRef}
-          className={`flex-1 overflow-y-auto ${mode === 'storage' || mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'phone' || mode === 'home' || mode === 'market' || mode === 'python' || mode === 'vault' || mode === 'math' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' ? '' : 'px-4 py-8'}`}
+          className={`flex-1 overflow-y-auto ${mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'python' || mode === 'vault' || mode === 'math' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' ? '' : 'px-4 py-8'}`}
         >
-          {mode === 'storage' ? (
-            <StorageManager />
-          ) : mode === 'logs' ? (
-            <SystemLogs />
+          {mode === 'logs' ? (
+            <Logs />
           ) : mode === 'control' ? (
-            <SystemControl />
-          ) : mode === 'phone' ? (
-            <PhoneInterface />
-          ) : mode === 'market' ? (
-            <MarketPreview onBack={() => setMode('home')} />
-          ) : mode === 'home' ? (
-            <HomeScreen onNavigate={(m) => setMode(m as any)} />
+            <Control />
           ) : mode === 'vault' ? (
-            <SecretVault onNavigate={(m) => setMode(m as any)} onClose={() => setMode('home')} />
+            <SecretVault onNavigate={(m) => setMode(m as any)} onClose={() => setMode('chat')} />
           ) : mode === 'python' ? (
             <PythonModule onSend={handleSend} messages={messages} isLoading={isLoading} />
           ) : mode === 'math' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' ? (
@@ -377,7 +344,7 @@ export default function App() {
                         referrerPolicy="no-referrer"
                       />
                     </div>
-                    <h2 className="text-2xl font-bold tracking-[0.2em] uppercase text-slate-900">System Ready</h2>
+                    <h2 className="text-2xl font-bold tracking-[0.2em] uppercase text-slate-900">Ready</h2>
                     <p className="mt-2 font-bold uppercase text-xs text-slate-400">Awaiting security audit parameters...</p>
                     
                     <div className="mt-10 grid w-full max-w-lg grid-cols-1 gap-3 sm:grid-cols-2">
@@ -433,7 +400,7 @@ export default function App() {
         </main>
 
         {/* Footer / Input Area */}
-        {mode !== 'storage' && mode !== 'logs' && mode !== 'docs' && mode !== 'control' && mode !== 'phone' && mode !== 'home' && mode !== 'market' && mode !== 'python' && mode !== 'vault' && mode !== 'math' && mode !== 'poet' && mode !== 'hacker' && mode !== 'professor' && mode !== 'bio' && mode !== 'astro' && (
+        {mode !== 'logs' && mode !== 'docs' && mode !== 'control' && mode !== 'python' && mode !== 'vault' && mode !== 'math' && mode !== 'poet' && mode !== 'hacker' && mode !== 'professor' && mode !== 'bio' && mode !== 'astro' && (
           <footer className="shrink-0 border-t p-4 bg-white">
             <div className="mx-auto max-w-3xl">
               <ChatInput onSend={handleSend} disabled={isLoading} />
@@ -457,17 +424,6 @@ export default function App() {
           </footer>
         )}
       </div>
-
-      <KnowledgeManager
-        isOpen={isKnowledgeOpen}
-        onClose={() => setIsKnowledgeOpen(false)}
-        knowledge={knowledge}
-        urls={urls}
-        onSave={(k, u) => {
-          setKnowledge(k);
-          setUrls(u);
-        }}
-      />
 
       <OverrideModal
         isOpen={isOverrideOpen}
