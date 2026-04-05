@@ -23,6 +23,9 @@ export function SecretVault({ onNavigate, onClose }: SecretVaultProps) {
     { id: 'professor', icon: GraduationCap, label: 'Sage Mind', color: 'bg-slate-700', desc: 'Distinguished Academic' },
     { id: 'bio', icon: Dna, label: 'Bio Core', color: 'bg-emerald-600', desc: 'Life Sciences Specialist' },
     { id: 'astro', icon: Orbit, label: 'Astro Link', color: 'bg-indigo-600', desc: 'Cosmology & Astrophysics' },
+    { id: 'skills', icon: Zap, label: 'Gemini Skills', color: 'bg-blue-500', desc: 'Advanced AI Capabilities' },
+    { id: 'math_simple', icon: Calculator, label: 'Simple Math', color: 'bg-green-600', desc: 'Elementary Math Tutor' },
+    { id: 'teacher_master', icon: GraduationCap, label: 'Master Teacher', color: 'bg-amber-600', desc: 'Ultimate Career Educator' },
   ];
 
   const handleUnlock = () => {

@@ -32,6 +32,12 @@ export function DeploymentGuide() {
       icon: Rocket,
       color: "bg-orange-500",
       content: "In Android Studio, go to 'Build' > 'Generate Signed Bundle / APK'. Follow the prompts to create your .aab file. This is the file you will upload to the Google Play Console."
+    },
+    {
+      title: "Step 6: Submit to Play Console",
+      icon: Globe,
+      color: "bg-blue-600",
+      content: "Log in to the Google Play Console, create a new app, and upload your .aab file. Complete the store listing, pricing, and distribution sections, then submit for review."
     }
   ];
 

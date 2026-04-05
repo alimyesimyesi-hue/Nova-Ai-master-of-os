@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Terminal, Trash2, Shield, BookOpen, Cpu, AlertTriangle, Zap, Image as ImageIcon, Video, Music, MessageSquare, Menu, X as CloseIcon, Plus, Mic, History, Settings, ArrowLeft, Brain, ShoppingBag } from 'lucide-react';
+import { Terminal, Trash2, Shield, BookOpen, Cpu, AlertTriangle, Zap, Image as ImageIcon, Video, Music, MessageSquare, Menu, X as CloseIcon, Plus, Mic, History, Settings, ArrowLeft, Brain, ShoppingBag, Rocket } from 'lucide-react';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { OverrideModal } from './components/OverrideModal';
@@ -9,7 +9,9 @@ import { Control } from './components/Control';
 import { DeploymentGuide } from './components/DeploymentGuide';
 import { PythonModule } from './components/PythonModule';
 import { SecretVault } from './components/SecretVault';
+import { LiveMode } from './components/LiveMode';
 import { streamChat, generateImage, generateVideo, generateMusic, generateSpeech, Message, ChatContext, ChatModelKey } from './lib/gemini';
+import { streamOpenAI } from './lib/openai';
 
 declare global {
   interface Window {
@@ -25,8 +27,10 @@ export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [isTurbo, setIsTurbo] = useState(false);
-  const [mode, setMode] = useState<ChatContext['mode'] | 'logs' | 'docs' | 'control' | 'market' | 'python' | 'vault'>('chat');
+  const [mode, setMode] = useState<ChatContext['mode'] | 'logs' | 'docs' | 'control' | 'market' | 'python' | 'vault' | 'skills' | 'live' | 'publish'>('chat');
   const [chatModel, setChatModel] = useState<ChatModelKey>('flash');
+  const [aiProvider, setAiProvider] = useState<'gemini' | 'openai'>('gemini');
+  const [selectedVoice, setSelectedVoice] = useState<'Puck' | 'Charon' | 'Kore' | 'Fenrir' | 'Zephyr'>('Zephyr');
   const [isOverrideOpen, setIsOverrideOpen] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(true); // Assume true initially
 
@@ -84,20 +88,32 @@ export default function App() {
         setMessages([...newMessages, assistantMessage]);
 
         let fullContent = '';
-        const context: ChatContext = { 
-          reason: reason || lastReason, 
-          turbo: isTurbo, 
-          mode: mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'market' || mode === 'python' || mode === 'vault' ? 'chat' : mode,
-          model: chatModel
-        };
-        const stream = streamChat(newMessages, context);
-
-        for await (const chunk of stream) {
-          if (fullContent === '') {
-            setProcessingTime(Date.now() - startTime);
+        
+        if (aiProvider === 'openai') {
+          const stream = streamOpenAI(newMessages);
+          for await (const chunk of stream) {
+            if (fullContent === '') {
+              setProcessingTime(Date.now() - startTime);
+            }
+            fullContent += chunk;
+            setMessages([...newMessages, { role: 'model', content: fullContent }]);
           }
-          fullContent += chunk;
-          setMessages([...newMessages, { role: 'model', content: fullContent }]);
+        } else {
+          const context: ChatContext = { 
+            reason: reason || lastReason, 
+            turbo: isTurbo, 
+            mode: mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'market' || mode === 'python' || mode === 'vault' || mode === 'skills' || mode === 'live' || mode === 'publish' ? 'chat' : mode,
+            model: chatModel
+          };
+          const stream = streamChat(newMessages, context);
+
+          for await (const chunk of stream) {
+            if (fullContent === '') {
+              setProcessingTime(Date.now() - startTime);
+            }
+            fullContent += chunk;
+            setMessages([...newMessages, { role: 'model', content: fullContent }]);
+          }
         }
       }
     } catch (error: any) {
@@ -146,36 +162,85 @@ export default function App() {
 
           <div className="flex-1 overflow-y-auto space-y-1">
             <div className="px-2 mb-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Intelligence Level</p>
-              <div className="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-lg">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Voice Synthesis</p>
+              <div className="grid grid-cols-5 gap-1 bg-slate-100 p-1 rounded-lg mb-4">
                 {[
-                  { id: 'mini', label: 'Mini' },
-                  { id: 'flash', label: 'Flash' },
-                  { id: 'pro', label: 'Pro' },
-                  { id: 'coder', label: 'Coder' }
-                ].map((m) => (
+                  { id: 'Charon', label: 'Bass' },
+                  { id: 'Kore', label: 'Soprano' },
+                  { id: 'Zephyr', label: 'Utro' },
+                  { id: 'Fenrir', label: 'Tenor' },
+                  { id: 'Puck', label: 'Vivid' }
+                ].map((v) => (
                   <button
-                    key={m.id}
-                    onClick={() => setChatModel(m.id as ChatModelKey)}
-                    className={`text-[10px] font-bold py-1.5 rounded-md transition-all ${
-                      chatModel === m.id 
-                        ? 'bg-white text-slate-900 shadow-sm' 
+                    key={v.id}
+                    onClick={() => setSelectedVoice(v.id as any)}
+                    className={`text-[8px] font-bold py-1.5 rounded-md transition-all ${
+                      selectedVoice === v.id 
+                        ? 'bg-white text-blue-600 shadow-sm' 
                         : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
-                    {m.label}
+                    {v.label}
                   </button>
                 ))}
               </div>
+
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">AI Engine</p>
+              <div className="grid grid-cols-2 gap-1 bg-slate-100 p-1 rounded-lg mb-4">
+                {[
+                  { id: 'gemini', label: 'Gemini' },
+                  { id: 'openai', label: 'ChatGPT' }
+                ].map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setAiProvider(p.id as any)}
+                    className={`text-[10px] font-bold py-1.5 rounded-md transition-all ${
+                      aiProvider === p.id 
+                        ? 'bg-white text-blue-600 shadow-sm' 
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+
+              {aiProvider === 'gemini' && (
+                <>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Intelligence Level</p>
+                  <div className="grid grid-cols-4 gap-1 bg-slate-100 p-1 rounded-lg">
+                    {[
+                      { id: 'mini', label: 'Mini' },
+                      { id: 'flash', label: 'Flash' },
+                      { id: 'pro', label: 'Pro' },
+                      { id: 'coder', label: 'Coder' }
+                    ].map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => setChatModel(m.id as ChatModelKey)}
+                        className={`text-[10px] font-bold py-1.5 rounded-md transition-all ${
+                          chatModel === m.id 
+                            ? 'bg-white text-slate-900 shadow-sm' 
+                            : 'text-slate-500 hover:text-slate-700'
+                        }`}
+                      >
+                        {m.label}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 mb-2">Multimodal Hub</p>
             {[
               { id: 'chat', icon: MessageSquare, label: 'Chat' },
+              { id: 'live', icon: Mic, label: 'Live Mode' },
               { id: 'video', icon: Video, label: 'Generate Video' },
               { id: 'market', icon: ShoppingBag, label: 'Market' },
               { id: 'logs', icon: History, label: 'Logs' },
               { id: 'docs', icon: BookOpen, label: 'Documentation' },
+              { id: 'publish', icon: Rocket, label: 'Publish to Play Store' },
               { id: 'control', icon: Settings, label: 'Control' },
             ].map((item) => (
               <button
@@ -260,17 +325,64 @@ export default function App() {
         {/* Chat Area */}
         <main 
           ref={scrollRef}
-          className={`flex-1 overflow-y-auto ${mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'python' || mode === 'vault' || mode === 'math' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' ? '' : 'px-4 py-8'}`}
+          className={`flex-1 overflow-y-auto ${mode === 'logs' || mode === 'docs' || mode === 'control' || mode === 'skills' || mode === 'python' || mode === 'vault' || mode === 'math' || mode === 'math_simple' || mode === 'teacher_master' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' || mode === 'live' || mode === 'publish' ? '' : 'px-4 py-8'}`}
         >
           {mode === 'logs' ? (
             <Logs />
           ) : mode === 'control' ? (
             <Control />
+          ) : mode === 'live' ? (
+            <LiveMode onClose={() => setMode('chat')} />
+          ) : mode === 'publish' ? (
+            <div className="flex h-full flex-col p-6 bg-white overflow-y-auto no-scrollbar">
+              <div className="mb-8 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-orange-50">
+                  <Rocket size={24} className="text-orange-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold tracking-[0.2em] uppercase text-slate-900">Play Store Deployment</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Mobile Launch Protocol // Android</p>
+                </div>
+              </div>
+              <DeploymentGuide />
+            </div>
+          ) : mode === 'skills' ? (
+            <div className="flex h-full flex-col p-6 bg-white overflow-y-auto no-scrollbar">
+              <div className="mb-8 flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-blue-50">
+                  <Zap size={24} className="text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold tracking-[0.2em] uppercase text-slate-900">Gemini Skills</h2>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Advanced Intelligence Capabilities</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  { title: "Massive Context", desc: "Process up to 2 million tokens—entire codebases, hour-long videos, or massive PDFs in a single prompt.", icon: BookOpen },
+                  { title: "Native Multimodal", desc: "Built from the ground up to understand text, images, audio, and video simultaneously.", icon: Brain },
+                  { title: "Search Grounding", desc: "Access real-time information from Google Search with citations for verifiable accuracy.", icon: Terminal },
+                  { title: "Google Ecosystem", desc: "Native access to Google Maps, YouTube, and Workspace (Docs, Gmail, Drive) via tools.", icon: ShoppingBag },
+                  { title: "Gemini Live", desc: "Ultra-low latency voice and video interaction for natural, real-time conversations.", icon: Mic },
+                  { title: "Imagen 3", desc: "High-quality image generation and editing directly within the model's output.", icon: ImageIcon },
+                  { title: "Veo Video", desc: "High-definition video generation (up to 4K) with cinematic control.", icon: Video },
+                  { title: "Lyria Audio", desc: "Advanced music and audio generation for high-fidelity soundscapes.", icon: Music },
+                ].map((skill) => (
+                  <div key={skill.title} className="p-4 rounded-xl border border-slate-100 bg-slate-50 hover:border-blue-200 transition-all">
+                    <div className="flex items-center gap-3 mb-2">
+                      <skill.icon size={18} className="text-blue-500" />
+                      <h3 className="text-sm font-bold uppercase tracking-tight text-slate-900">{skill.title}</h3>
+                    </div>
+                    <p className="text-xs text-slate-500 leading-relaxed">{skill.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           ) : mode === 'vault' ? (
             <SecretVault onNavigate={(m) => setMode(m as any)} onClose={() => setMode('chat')} />
           ) : mode === 'python' ? (
             <PythonModule onSend={handleSend} messages={messages} isLoading={isLoading} />
-          ) : mode === 'math' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' ? (
+          ) : mode === 'math' || mode === 'math_simple' || mode === 'teacher_master' || mode === 'poet' || mode === 'hacker' || mode === 'professor' || mode === 'bio' || mode === 'astro' ? (
             <div className="flex h-full flex-col bg-slate-950 text-white overflow-hidden">
               <div className="shrink-0 p-4 border-b border-white/10 bg-slate-900/50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -279,6 +391,8 @@ export default function App() {
                   </button>
                   <span className="text-xs font-black uppercase tracking-widest text-blue-400">
                     {mode === 'math' ? 'Math Master' : 
+                     mode === 'math_simple' ? 'Simple Math' :
+                     mode === 'teacher_master' ? 'Master Teacher' :
                      mode === 'poet' ? 'Verse Forge' : 
                      mode === 'hacker' ? 'Shadow Node' : 
                      mode === 'professor' ? 'Sage Mind' : 
@@ -289,7 +403,14 @@ export default function App() {
               </div>
               <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
                 {messages.map((msg, i) => (
-                  <ChatMessage key={i} role={msg.role} content={msg.content} type={msg.type} mediaUrl={msg.mediaUrl} />
+                  <ChatMessage 
+                    key={i} 
+                    role={msg.role} 
+                    content={msg.content} 
+                    type={msg.type} 
+                    mediaUrl={msg.mediaUrl} 
+                    voiceName={selectedVoice}
+                  />
                 ))}
                 {isLoading && <div className="text-[10px] font-bold text-blue-400 animate-pulse uppercase tracking-widest">Processing...</div>}
               </div>
@@ -373,6 +494,7 @@ export default function App() {
                       content={msg.content} 
                       type={msg.type}
                       mediaUrl={msg.mediaUrl}
+                      voiceName={selectedVoice}
                     />
                   ))
                 )}
@@ -400,7 +522,7 @@ export default function App() {
         </main>
 
         {/* Footer / Input Area */}
-        {mode !== 'logs' && mode !== 'docs' && mode !== 'control' && mode !== 'python' && mode !== 'vault' && mode !== 'math' && mode !== 'poet' && mode !== 'hacker' && mode !== 'professor' && mode !== 'bio' && mode !== 'astro' && (
+        {mode !== 'logs' && mode !== 'docs' && mode !== 'control' && mode !== 'skills' && mode !== 'python' && mode !== 'vault' && mode !== 'math' && mode !== 'math_simple' && mode !== 'teacher_master' && mode !== 'poet' && mode !== 'hacker' && mode !== 'professor' && mode !== 'bio' && mode !== 'astro' && mode !== 'live' && mode !== 'publish' && (
           <footer className="shrink-0 border-t p-4 bg-white">
             <div className="mx-auto max-w-3xl">
               <ChatInput onSend={handleSend} disabled={isLoading} />

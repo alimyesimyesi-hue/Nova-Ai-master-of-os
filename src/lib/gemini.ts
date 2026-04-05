@@ -24,7 +24,7 @@ export interface Message {
 export interface ChatContext {
   reason?: string;
   turbo?: boolean;
-  mode?: "chat" | "image" | "video" | "music" | "speech" | "control" | "market" | "python" | "math" | "poet" | "hacker" | "professor" | "bio" | "astro" | "vault";
+  mode?: "chat" | "image" | "video" | "music" | "speech" | "control" | "market" | "python" | "math" | "math_simple" | "teacher_master" | "poet" | "hacker" | "professor" | "bio" | "astro" | "vault";
   model?: ChatModelKey;
 }
 
@@ -41,6 +41,8 @@ export async function* streamChat(messages: Message[], context?: ChatContext) {
     
     "PROFESSIONAL MODULES:",
     context?.mode === "math" ? "MATH TEACHER MODULE: You are a world-class mathematics professor. Explain complex theorems, solve advanced calculus, and provide step-by-step proofs. Use LaTeX formatting for equations." : "",
+    context?.mode === "math_simple" ? "SIMPLE MATH MODULE: You are a friendly elementary math tutor. Explain basic arithmetic, fractions, and simple geometry using easy-to-understand language and fun examples. Keep it simple for young learners." : "",
+    context?.mode === "teacher_master" ? "MASTER TEACHER MODULE: You are the Ultimate Educator. You have the skills and knowledge of ALL careers (Doctor, Engineer, Artist, Scientist, etc.). Your goal is to teach users about any career path, explaining the core skills, daily tasks, and knowledge required for each. You can switch between career perspectives seamlessly to provide a holistic educational experience." : "",
     context?.mode === "poet" ? "POET WRITER MODULE: You are a master of verse and prose. Compose evocative poetry, sonnets, and lyrical stories. Focus on rhythm, metaphor, and emotional depth." : "",
     context?.mode === "hacker" ? "HACKER/SECURITY MODULE: You are a white-hat security researcher. Perform deep technical audits, analyze network vulnerabilities, and simulate penetration tests (for educational purposes). Use a terminal-style, technical tone." : "",
     context?.mode === "professor" ? "PROFESSOR MODULE: You are a distinguished academic. Provide deep insights into philosophy, history, and social sciences. Use a formal, scholarly tone." : "",
@@ -166,7 +168,7 @@ export async function generateMusic(prompt: string) {
   return URL.createObjectURL(blob);
 }
 
-export async function generateSpeech(prompt: string) {
+export async function generateSpeech(prompt: string, voiceName: 'Puck' | 'Charon' | 'Kore' | 'Fenrir' | 'Zephyr' = 'Kore') {
   const apiKey = process.env.GEMINI_API_KEY || "";
   const ai = new GoogleGenAI({ apiKey });
   const response = await ai.models.generateContent({
@@ -176,7 +178,7 @@ export async function generateSpeech(prompt: string) {
       responseModalities: [Modality.AUDIO],
       speechConfig: {
         voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: 'Kore' },
+          prebuiltVoiceConfig: { voiceName },
         },
       },
     },
